@@ -1,0 +1,31 @@
+Age,Gender,Department,JobRole,MonthlyIncome,JobSatisfaction,YearsAtCompany,WorkLifeBalance,OverTime,PromotionHistory,Attrition
+32,Male,Sales,Sales Executive,4500,3,5,2,Yes,No,No
+28,Female,IT,Software Engineer,5200,4,2,3,No,Yes,No
+45,Male,HR,HR Manager,6000,3,10,2,No,Yes,No
+35,Female,Sales,Sales Manager,5500,2,8,1,Yes,No,Yes
+29,Male,IT,Data Analyst,4800,4,3,3,No,No,No
+38,Female,Finance,Finance Analyst,5100,3,6,2,Yes,No,No
+26,Male,Sales,Sales Exec,4200,1,1,1,Yes,No,Yes
+42,Female,IT,Tech Lead,6500,4,9,3,No,Yes,No
+31,Male,HR,HR Specialist,4700,3,4,2,No,No,No
+27,Female,Sales,Sales Coord,3800,2,1,1,Yes,No,Yes
+33,Male,IT,Developer,5300,4,7,3,No,No,No
+40,Female,Finance,Senior Analyst,5800,3,12,2,No,Yes,No
+29,Male,Sales,Account Exec,4600,3,2,2,Yes,No,No
+36,Female,IT,QA Engineer,4900,3,5,3,No,No,No
+44,Male,HR,HR Head,7000,4,15,3,No,Yes,No
+25,Female,Sales,Sales Rep,3500,1,0,1,Yes,No,Yes
+39,Male,IT,Architect,6800,4,11,4,No,Yes,No
+30,Female,Finance,Controller,5900,3,8,2,No,No,No
+28,Male,Sales,Sales Officer,4300,2,2,1,Yes,No,Yes
+35,Female,IT,Manager,6200,4,9,3,No,Yes,No
+41,Male,HR,Recruiter,5000,3,7,2,Yes,No,No
+26,Female,Sales,Consultant,3900,2,1,1,Yes,No,Yes
+37,Male,IT,Support Lead,5400,3,6,2,No,No,No
+33,Female,Finance,Auditor,5200,3,5,2,No,No,No
+29,Male,Sales,Executive,4400,2,3,1,Yes,No,Yes
+43,Female,IT,Principal Eng,7000,4,13,4,No,Yes,No
+27,Male,HR,Coordinator,4100,3,2,2,No,No,No
+38,Female,Sales,District Mgr,5700,3,10,2,No,Yes,No
+31,Male,IT,Engineer,5100,3,5,3,No,No,No
+34,Female,Finance,Tax Specialist,5500,3,7,2,No,No,No

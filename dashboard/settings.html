@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AttritionAI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --gold: #3b82f6;
+            --amber: #60a5fa;
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c0;
+            --shadow-acrylic: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 15% 20%, rgba(59, 130, 246, 0.11) 0%, transparent 40%),
+                        radial-gradient(ellipse at 85% 80%, rgba(96, 165, 250, 0.08) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.035;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+        }
+        .dashboard-container { position: relative; z-index: 2; min-height: 100vh; display: flex; }
+        .sidebar {
+            width: 280px;
+            padding: 24px 16px;
+            background: rgba(18, 18, 26, 0.75);
+            backdrop-filter: blur(40px) saturate(180%);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .logo { display: flex; align-items: center; gap: 12px; padding: 12px; font-size: 20px; font-weight: 700; color: var(--gold); }
+        .logo i { font-size: 28px; }
+        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 12px;
+            color: rgba(255, 255, 255, 0.85); text-decoration: none; font-size: 15px; font-weight: 500;
+            transition: all 0.3s;
+        }
+        .nav-item:hover { background: rgba(59, 130, 246, 0.12); }
+        .nav-item.active { background: rgba(59, 130, 246, 0.18); color: var(--gold); border: 1px solid rgba(59, 130, 246, 0.35); }
+        .nav-item i { width: 20px; font-size: 18px; }
+        .main-content { flex: 1; overflow-y: auto; }
+        .header {
+            padding: 24px 32px;
+            background: rgba(18, 18, 26, 0.72);
+            backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky; top: 0; z-index: 5;
+        }
+        .header h1 {
+            font-size: 28px; font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header p { color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-top: 4px; }
+        .content { padding: 32px; max-width: 900px; }
+        .settings-section { margin-bottom: 32px; }
+        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .section-title i { color: var(--gold); }
+        .settings-card {
+            background: rgba(26, 26, 38, 0.65);
+            backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow-acrylic);
+        }
+        .setting-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-info h4 { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+        .setting-info p { font-size: 13px; color: var(--text-secondary); }
+        .toggle {
+            width: 52px; height: 28px; background: rgba(255, 255, 255, 0.1);
+            border-radius: 14px; position: relative; cursor: pointer; transition: all 0.3s;
+        }
+        .toggle.active { background: var(--gold); }
+        .toggle::after {
+            content: ''; position: absolute; width: 22px; height: 22px;
+            background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: all 0.3s;
+        }
+        .toggle.active::after { left: 27px; }
+        select, input[type="text"], input[type="email"], input[type="number"] {
+            padding: 10px 14px; border-radius: 10px; font-size: 14px;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff; min-width: 180px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .btn-save {
+            background: linear-gradient(135deg, var(--gold), var(--amber)); color: #000; padding: 14px 28px;
+            border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; margin-top: 16px;
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4); }
+        .btn-outline {
+            background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;
+            padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer;
+            margin-left: 12px; transition: all 0.3s;
+        }
+        .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+        .danger-zone { border-color: rgba(239, 68, 68, 0.3); }
+        .danger-zone .setting-row { border-color: rgba(239, 68, 68, 0.15); }
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .logo span, .nav-item span { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fas fa-chart-line"></i><span>AttritionAI</span></div>
+            <nav class="nav-menu">
+                <a href="/" class="nav-item"><i class="fas fa-th-large"></i><span>Dashboard</span></a>
+                <a href="/employees" class="nav-item"><i class="fas fa-users"></i><span>Employees</span></a>
+                <a href="/analysis" class="nav-item"><i class="fas fa-chart-bar"></i><span>Attrition Analysis</span></a>
+                <a href="/predictions" class="nav-item"><i class="fas fa-brain"></i><span>Predictions</span></a>
+                <a href="/reports" class="nav-item"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+                <a href="/settings" class="nav-item active" style="margin-top:auto;"><i class="fas fa-cog"></i><span>Settings</span></a>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="header">
+                <h1>Settings</h1>
+                <p>Manage your dashboard preferences and configurations</p>
+            </header>
+            <div class="content">
+                <div class="settings-section">
+                    <h3 class="section-title"><i class="fas fa-user-circle"></i> Profile Settings</h3>
+                    <div class="settings-card">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Display Name</label>
+                                <input type="text" value="Admin User" placeholder="Your name">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" value="admin@company.com" placeholder="Your email">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Role</label>
+                                <select>
+                                    <option value="admin">Administrator</option>
+                                    <option value="analyst">Data Analyst</option>
+                                    <option value="hr">HR Manager</option>
+                                    <option value="viewer">Viewer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select>
+                                    <option value="hr">Human Resources</option>
+                                    <option value="it">Information Technology</option>
+                                    <option value="data">Data Science</option>
+                                    <option value="exec">Executive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title"><i class="fas fa-bell"></i> Notifications</h3>
+                    <div class="settings-card">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Email Notifications</h4>
+                                <p>Receive email alerts for high-risk employees and weekly summaries</p>
+                            </div>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Daily Digest</h4>
+                                <p>Get a daily summary of key metrics and changes</p>
+                            </div>
+                            <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Alert Threshold</h4>
+                                <p>Notify when attrition risk exceeds this percentage</p>
+                            </div>
+                            <select>
+                                <option value="50">50%</option>
+                                <option value="60">60%</option>
+                                <option value="70" selected>70%</option>
+                                <option value="80">80%</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title"><i class="fas fa-cogs"></i> Model Configuration</h3>
+                    <div class="settings-card">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>ML Model Version</h4>
+                                <p>Select which prediction model to use</p>
+                            </div>
+                            <select>
+                                <option value="v3">v3.0 (Latest)</option>
+                                <option value="v2">v2.5 (Stable)</option>
+                                <option value="v1">v1.0 (Legacy)</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Auto-Retrain Model</h4>
+                                <p>Automatically retrain the model when new data is available</p>
+                            </div>
+                            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Confidence Threshold</h4>
+                                <p>Minimum confidence level for predictions</p>
+                            </div>
+                            <select>
+                                <option value="0.7">70%</option>
+                                <option value="0.8" selected>80%</option>
+                                <option value="0.9">90%</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title"><i class="fas fa-palette"></i> Appearance</h3>
+                    <div class="settings-card">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Theme</h4>
+                                <p>Choose your preferred color scheme</p>
+                            </div>
+                            <select>
+                                <option value="dark" selected>Dark Mode</option>
+                                <option value="light">Light Mode</option>
+                                <option value="system">System Default</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Compact Mode</h4>
+                                <p>Use smaller spacing and font sizes for more content</p>
+                            </div>
+                            <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="section-title" style="color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                    <div class="settings-card danger-zone">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Reset Dashboard</h4>
+                                <p>Clear all custom settings and restore defaults</p>
+                            </div>
+                            <button class="btn-danger"><i class="fas fa-redo"></i> Reset</button>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Clear Cache</h4>
+                                <p>Remove cached data and predictions</p>
+                            </div>
+                            <button class="btn-danger"><i class="fas fa-trash"></i> Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <button class="btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                    <button class="btn-outline">Cancel</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

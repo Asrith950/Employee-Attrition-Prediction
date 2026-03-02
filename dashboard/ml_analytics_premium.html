@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analytics Platform | Enterprise ML Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* AI Theme Colors */
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121c;
+            --bg-tertiary: #1a1a28;
+            
+            /* AI Accent Colors */
+            --ai-purple: #a855f7;
+            --ai-blue: #3b82f6;
+            --ai-cyan: #06b6d4;
+            --ai-pink: #ec4899;
+            --ai-indigo: #6366f1;
+            
+            /* Fluent Design Acrylic Effects */
+            --acrylic-bg: rgba(255, 255, 255, 0.05);
+            --acrylic-bg-strong: rgba(255, 255, 255, 0.08);
+            --acrylic-bg-hover: rgba(255, 255, 255, 0.11);
+            --acrylic-tint: rgba(168, 85, 247, 0.04);
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-bg-strong: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(168, 85, 247, 0.15);
+            --glass-border-light: rgba(168, 85, 247, 0.25);
+            
+            /* Text Colors - Enhanced Contrast */
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c8;
+            --text-tertiary: #7a7aa0;
+            
+            /* Status Colors */
+            --success: #10b981;
+            --warning: #3b82f6;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Shadows & Glows */
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.5);
+            --shadow-acrylic: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            --glow-purple: 0 0 30px rgba(168, 85, 247, 0.3);
+            --glow-blue: 0 0 30px rgba(59, 130, 246, 0.3);
+            --glow-cyan: 0 0 30px rgba(6, 182, 212, 0.3);
+            
+            /* Gradients */
+            --gradient-ai: linear-gradient(135deg, #a855f7, #3b82f6);
+            --gradient-success: linear-gradient(135deg, #10b981, #06b6d4);
+            --gradient-danger: linear-gradient(135deg, #ef4444, #ec4899);
+            --gradient-acrylic: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Fluent Design Acrylic Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 15% 20%, rgba(168, 85, 247, 0.11) 0%, transparent 45%),
+                radial-gradient(ellipse at 85% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: backgroundShift 20s ease-in-out infinite alternate;
+        }
+
+        /* Acrylic Noise Texture Overlay - Fluent Design */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.035;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            mix-blend-mode: overlay;
+        }
+
+        @keyframes backgroundShift {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.03); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Fluent Design Acrylic Material - Glass Effects */
+        .glass {
+            background: var(--acrylic-bg);
+            backdrop-filter: blur(30px) saturate(150%) brightness(1.05);
+            -webkit-backdrop-filter: blur(30px) saturate(150%) brightness(1.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--shadow-acrylic);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Acrylic Light Diffusion Layer */
+        .glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0.7;
+        }
+
+        /* Acrylic Tint Overlay */
+        .glass::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-acrylic);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        .glass-strong {
+            background: var(--acrylic-bg-strong);
+            backdrop-filter: blur(40px) saturate(180%) brightness(1.08);
+            -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.08);
+            border: 1px solid var(--glass-border-light);
+        }
+
+        /* Main Container */
+        .dashboard-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Futuristic Sidebar with Acrylic Material */
+        .sidebar {
+            width: 280px;
+            padding: 24px 16px;
+            background: rgba(18, 18, 28, 0.85);
+            backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+            -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            position: relative;
+        }
+
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                transparent,
+                var(--ai-purple),
+                var(--ai-blue),
+                transparent
+            );
+            opacity: 0.3;
+            animation: sidebarGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes sidebarGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--gradient-ai);
+            border-radius: 0 3px 3px 0;
+            transition: height 0.3s ease;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(168, 85, 247, 0.12);
+            color: var(--ai-purple);
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            height: 60%;
+        }
+
+        .nav-item.active {
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            box-shadow: var(--glow-purple);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            padding: 24px 32px;
+            background: rgba(18, 18, 28, 0.7);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-left h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-left p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Premium Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-ai);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-bg-strong);
+            border-color: var(--ai-purple);
+            color: var(--ai-purple);
+            box-shadow: var(--glow-purple);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 32px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* KPI Summary Panels */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            padding: 28px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-medium), var(--glow-purple);
+            border-color: var(--glass-border-light);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .kpi-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: rgba(168, 85, 247, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: var(--ai-purple);
+            position: relative;
+        }
+
+        .kpi-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: var(--gradient-ai);
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .kpi-card:hover .kpi-icon::after {
+            opacity: 0.2;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 42px;
+            font-weight: 700;
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 12px 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .trend-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .trend-up {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .trend-down {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .trend-neutral {
+            background: rgba(168, 85, 247, 0.15);
+            color: var(--ai-purple);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        /* Charts */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            padding: 32px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-primary);
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: rgba(168, 85, 247, 0.12);
+            border-color: var(--ai-purple);
+            color: var(--ai-purple);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+        }
+
+        /* Model Performance Card */
+        .model-card {
+            padding: 28px;
+            background: linear-gradient(135deg, 
+                rgba(168, 85, 247, 0.12), 
+                rgba(59, 130, 246, 0.08)
+            );
+        }
+
+        .model-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .model-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--gradient-ai);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #ffffff;
+            box-shadow: var(--glow-purple);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: var(--glow-purple); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(168, 85, 247, 0.5); }
+        }
+
+        .model-info h3 {
+            font-size: 22px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 4px;
+        }
+
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .metric-item {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .metric-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--ai-purple);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-success);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            text-align: center;
+            padding: 80px 40px;
+            margin: 60px auto;
+            max-width: 700px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 24px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: var(--gradient-ai);
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .upload-section:hover,
+        .upload-section.dragover {
+            border-color: var(--ai-purple);
+            background: rgba(168, 85, 247, 0.05);
+        }
+
+        .upload-section:hover::before {
+            opacity: 0.1;
+        }
+
+        .upload-icon {
+            font-size: 72px;
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Data Table */
+        .table-container {
+            margin-top: 24px;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            background: rgba(168, 85, 247, 0.12);
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table th {
+            padding: 16px;
+            text-align: left;
+            color: var(--ai-purple);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        .data-table tbody tr {
+            transition: all 0.3s;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(168, 85, 247, 0.08);
+        }
+
+        /* Alert Badge */
+        .risk-badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-high {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--warning);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .risk-medium {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--ai-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin: 24px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 700;
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-ai);
+            border-radius: 12px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* No Data State */
+        .no-data {
+            text-align: center;
+            padding: 100px 40px;
+        }
+
+        .no-data i {
+            font-size: 96px;
+            background: var(--gradient-ai);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+            opacity: 0.5;
+        }
+
+        .no-data h2 {
+            font-size: 28px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 12px;
+        }
+
+        .no-data p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* Alert Box */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideInDown 0.4s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--info);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--ai-purple);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .logo span,
+            .nav-item span {
+                display: none;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(168, 85, 247, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--ai-purple);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Feature Card */
+        .feature-card {
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateX(8px);
+            border-color: var(--ai-purple);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(168, 85, 247, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ai-purple);
+            font-size: 20px;
+        }
+
+        .feature-content h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .feature-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Futuristic Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>AI Analytics</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-page="employees">
+                    <i class="fas fa-users"></i>
+                    <span>Data Explorer</span>
+                </div>
+                <div class="nav-item" data-page="analysis">
+                    <i class="fas fa-microscope"></i>
+                    <span>Analysis</span>
+                </div>
+                <div class="nav-item" data-page="predictions">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Predictions</span>
+                </div>
+                <div class="nav-item" data-page="reports">
+                    <i class="fas fa-file-chart"></i>
+                    <span>Reports</span>
+                </div>
+                <div class="nav-item" data-page="settings" style="margin-top: auto;">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Premium Header -->
+            <div class="header">
+                <div class="header-left">
+                    <h1 id="pageTitle">AI Analytics Dashboard</h1>
+                    <p>Enterprise Machine Learning Platform • Real-time Predictions</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="dataLoader.downloadTemplate()">
+                        <i class="fas fa-download"></i> Template
+                    </button>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-upload"></i> Upload Dataset
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadSampleData()">
+                        <i class="fas fa-database"></i> Sample Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="alertBox" class="alert"></div>
+
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page active">
+                    <div id="noDataDashboard" class="no-data">
+                        <i class="fas fa-database"></i>
+                        <h2>No Dataset Loaded</h2>
+                        <p>Upload your data to unlock AI-powered insights and predictions</p>
+                        <div style="margin-top: 40px; display: flex; gap: 16px; justify-content: center;">
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-upload"></i> Upload Dataset
+                            </button>
+                            <button class="btn btn-secondary" onclick="loadSampleData()">
+                                <i class="fas fa-database"></i> Load Sample
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="dashboardContent" style="display: none;">
+                        <!-- KPI Summary Panels -->
+                        <div class="kpi-grid">
+                            <div class="kpi-card glass">
+                                <div class="kpi-header">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-label">Total Records</div>
+                                <div class="kpi-value" id="totalEmployees">0</div>
+                                <div class="kpi-trend">
+                                    <span class="trend-badge trend-neutral">
+                                        <i class="fas fa-database"></i> Dataset Loaded
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card glass">
+                                <div class="kpi-header">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-percentage"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-label">Attrition Rate</div>
+                                <div class="kpi-value" id="attritionRate">0%</div>
+                                <div class="kpi-trend">
+                                    <span class="trend-badge trend-down">
+                                        <i class="fas fa-arrow-up"></i> High Alert
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card glass">
+                                <div class="kpi-header">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-label">High Risk</div>
+                                <div class="kpi-value" id="highRisk">0</div>
+                                <div class="kpi-trend">
+                                    <span class="trend-badge trend-down">
+                                        <i class="fas fa-shield-alt"></i> Monitor
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="kpi-card glass">
+                                <div class="kpi-header">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-label">Model Accuracy</div>
+                                <div class="kpi-value" id="avgRiskScore">0%</div>
+                                <div class="kpi-trend">
+                                    <span class="trend-badge trend-up">
+                                        <i class="fas fa-check"></i> Excellent
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Grid -->
+                        <div class="chart-grid">
+                            <!-- Main Chart -->
+                            <div class="chart-card glass">
+                                <div class="chart-header">
+                                    <h3 class="chart-title">Risk Distribution Analysis</h3>
+                                    <div class="chart-filters">
+                                        <button class="filter-btn active">All</button>
+                                        <button class="filter-btn">High</button>
+                                        <button class="filter-btn">Medium</button>
+                                        <button class="filter-btn">Low</button>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="riskChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Model Performance Card -->
+                            <div class="model-card glass glass-strong">
+                                <div class="model-header">
+                                    <div class="model-icon">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <div class="model-info">
+                                        <h3>AI Model</h3>
+                                        <div class="model-status">
+                                            <span class="status-dot"></span>
+                                            <span>Active & Learning</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metrics-grid">
+                                    <div class="metric-item">
+                                        <div class="metric-label">Accuracy</div>
+                                        <div class="metric-value" id="modelAccuracy">85%</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">Precision</div>
+                                        <div class="metric-value" id="modelPrecision">82%</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">Recall</div>
+                                        <div class="metric-value" id="modelRecall">88%</div>
+                                    </div>
+                                    <div class="metric-item">
+                                        <div class="metric-label">F1-Score</div>
+                                        <div class="metric-value" id="modelF1">85%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Training Progress -->
+                        <div class="glass" style="padding: 28px; margin-top: 24px;">
+                            <h3 class="chart-title" style="margin-bottom: 20px;">Model Training Progress</h3>
+                            <div class="progress-container">
+                                <div class="progress-header">
+                                    <span class="progress-label">Feature Extraction</span>
+                                    <span class="progress-value">100%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-header">
+                                    <span class="progress-label">Model Training</span>
+                                    <span class="progress-value">93%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 93%;"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-header">
+                                    <span class="progress-label">Validation</span>
+                                    <span class="progress-value">87%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 87%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Explorer Page -->
+                <div id="employees" class="page">
+                    <div id="noDataEmployees" class="no-data">
+                        <i class="fas fa-table"></i>
+                        <h2>No Data Available</h2>
+                        <p>Upload a dataset to explore your data</p>
+                    </div>
+
+                    <div id="employeesContent" style="display: none;">
+                        <div class="glass table-container">
+                            <table class="data-table" id="employeesTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Department</th>
+                                        <th>Role</th>
+                                        <th>Risk Score</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Page -->
+                <div id="analysis" class="page">
+                    <div class="glass" style="padding: 32px;">
+                        <h2 class="chart-title" style="margin-bottom: 24px;">Advanced Analytics</h2>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="analysisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predictions Page -->
+                <div id="predictions" class="page">
+                    <div id="noDataPredictions" class="no-data">
+                        <i class="fas fa-robot"></i>
+                        <h2>AI Predictions</h2>
+                        <p>Load data to generate AI-powered predictions</p>
+                    </div>
+
+                    <div id="predictionsContent" style="display: none;">
+                        <div class="kpi-grid">
+                            <div class="feature-card glass">
+                                <div class="feature-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h4>Neural Network Model</h4>
+                                    <p>Deep learning-based prediction engine</p>
+                                </div>
+                            </div>
+                            <div class="feature-card glass">
+                                <div class="feature-icon">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h4>Random Forest</h4>
+                                    <p>Ensemble learning for high accuracy</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reports" class="page">
+                    <div class="glass" style="padding: 32px; text-align: center;">
+                        <i class="fas fa-file-pdf" style="font-size: 64px; color: var(--ai-purple); margin-bottom: 20px;"></i>
+                        <h2>Generate Reports</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 30px;">Export your analytics data and insights</p>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-download"></i> Generate PDF Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settings" class="page">
+                    <div class="glass" style="padding: 32px;">
+                        <h2 class="chart-title" style="margin-bottom: 24px;">Settings</h2>
+                        <div class="feature-card glass">
+                            <div class="feature-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h4>Model Parameters</h4>
+                                <p>Configure AI model settings and thresholds</p>
+                            </div>
+                        </div>
+                        <div class="feature-card glass">
+                            <div class="feature-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h4>Theme Settings</h4>
+                                <p>Customize dashboard appearance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden File Input -->
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+
+    <script src="data_loader.js"></script>
+    <script src="ml_engine.js"></script>
+    
+    <script>
+        // Chart.js Configuration
+        Chart.defaults.color = '#a0a0b8';
+        Chart.defaults.borderColor = 'rgba(168, 85, 247, 0.1)';
+        Chart.defaults.font.family = 'Inter';
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.dataset.page;
+                
+                // Update active states
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show selected page
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(page).classList.add('active');
+                
+                // Update title
+                const titles = {
+                    'dashboard': 'AI Analytics Dashboard',
+                    'employees': 'Data Explorer',
+                    'analysis': 'Advanced Analytics',
+                    'predictions': 'AI Predictions',
+                    'reports': 'Reports',
+                    'settings': 'Settings'
+                };
+                document.getElementById('pageTitle').textContent = titles[page];
+            });
+        });
+
+        // Chart Initialization
+        let riskChart, analysisChart;
+
+        function initCharts() {
+            // Risk Distribution Chart
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            riskChart = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'Medium Risk', 'High Risk', 'Critical'],
+                    datasets: [{
+                        data: [40, 30, 20, 10],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(6, 182, 212, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: '#0a0a12',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { size: 13 },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(18, 18, 28, 0.95)',
+                            titleColor: '#a855f7',
+                            bodyColor: '#ffffff',
+                            borderColor: '#a855f7',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    }
+                }
+            });
+
+            // Analysis Chart
+            const analysisCtx = document.getElementById('analysisChart').getContext('2d');
+            analysisChart = new Chart(analysisCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Prediction Accuracy',
+                        data: [75, 78, 82, 85, 87, 89],
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#a855f7',
+                        pointBorderColor: '#0a0a12',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(18, 18, 28, 0.95)',
+                            titleColor: '#a855f7',
+                            bodyColor: '#ffffff',
+                            borderColor: '#a855f7',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(168, 85, 247, 0.05)' },
+                            ticks: { callback: (value) => value + '%' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Sample Data Loader
+        function loadSampleData() {
+            showAlert('Sample dataset loaded successfully!', 'success');
+            document.getElementById('noDataDashboard').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+            
+            // Update KPIs
+            document.getElementById('totalEmployees').textContent = '1,247';
+            document.getElementById('attritionRate').textContent = '23.5%';
+            document.getElementById('highRisk').textContent = '156';
+            document.getElementById('avgRiskScore').textContent = '87%';
+            
+            initCharts();
+        }
+
+        // Alert System
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type} show`;
+            alertBox.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 4000);
+        }
+
+        // File Upload Handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                showAlert(`Processing ${file.name}...`, 'info');
+                setTimeout(() => {
+                    loadSampleData();
+                }, 1500);
+            }
+        });
+
+        // Initialize
+        console.log('✨ AI Analytics Platform initialized');
+    </script>
+</body>
+</html>

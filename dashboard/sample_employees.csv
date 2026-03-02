@@ -1,0 +1,31 @@
+EmployeeID,Name,Age,Department,JobRole,MonthlyIncome,JobSatisfaction,WorkLifeBalance,YearsAtCompany,OverTime,Attrition
+1,John Smith,45,Sales,Sales Executive,5000,4,3,10,No,No
+2,Sarah Johnson,28,Research & Development,Research Scientist,8000,5,4,3,No,No
+3,Mike Davis,33,Sales,Sales Representative,3000,2,2,1,Yes,Yes
+4,Emily Wilson,41,Human Resources,HR Manager,6500,4,4,8,No,No
+5,David Brown,29,Research & Development,Laboratory Technician,2500,1,1,0.5,Yes,Yes
+6,Lisa Anderson,38,Sales,Sales Manager,9500,5,3,12,Yes,No
+7,James Taylor,25,Research & Development,Research Scientist,3500,3,2,1,Yes,Yes
+8,Jennifer Martinez,52,Human Resources,Human Resources,7000,4,4,15,No,No
+9,Robert Lee,31,Sales,Sales Executive,4500,2,2,2,Yes,No
+10,Mary White,36,Research & Development,Manufacturing Director,12000,5,5,10,No,No
+11,William Garcia,27,Sales,Sales Representative,2800,1,1,0.3,Yes,Yes
+12,Patricia Rodriguez,44,Human Resources,HR Business Partner,5500,4,3,7,No,No
+13,Thomas Martinez,30,Research & Development,Research Scientist,7500,4,3,4,No,No
+14,Linda Hernandez,26,Sales,Sales Representative,3200,2,2,1,Yes,Yes
+15,Charles Lopez,48,Research & Development,Manager,11000,5,4,14,No,No
+16,Barbara Gonzalez,35,Human Resources,Human Resources,4800,3,3,5,No,No
+17,Joseph Wilson,29,Sales,Sales Executive,4000,2,2,2,Yes,Yes
+18,Susan Anderson,42,Research & Development,Research Director,13500,5,4,11,Yes,No
+19,Christopher Thomas,32,Sales,Sales Manager,8500,4,3,6,No,No
+20,Jessica Taylor,28,Human Resources,Human Resources,3800,3,3,2,No,No
+21,Daniel Moore,24,Research & Development,Laboratory Technician,2200,1,1,0.2,Yes,Yes
+22,Karen Jackson,50,Sales,Sales Manager,10500,5,4,18,No,No
+23,Matthew Martin,34,Research & Development,Research Scientist,6800,4,3,5,No,No
+24,Nancy Lee,27,Human Resources,HR Business Partner,4200,3,3,3,No,No
+25,Anthony Perez,26,Sales,Sales Representative,2900,2,1,0.5,Yes,Yes
+26,Donna Thompson,46,Research & Development,Manager,10800,4,4,13,No,No
+27,Mark White,31,Sales,Sales Executive,4700,3,3,4,Yes,No
+28,Carol Harris,39,Human Resources,HR Manager,7200,4,4,9,No,No
+29,Paul Clark,25,Research & Development,Laboratory Technician,2600,2,2,0.8,Yes,Yes
+30,Sandra Lewis,43,Sales,Sales Manager,9200,5,3,11,No,No

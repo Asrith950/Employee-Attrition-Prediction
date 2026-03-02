@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees - AttritionAI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Dark Base Colors */
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            
+            /* Blue Accents */
+            --gold: #3b82f6;
+            --amber: #60a5fa;
+            --orange: #93c5fd;
+            --warm-glow: #2563eb;
+            
+            /* Fluent Design Acrylic Effects */
+            --acrylic-bg: rgba(255, 255, 255, 0.05);
+            --acrylic-bg-strong: rgba(255, 255, 255, 0.08);
+            --acrylic-bg-hover: rgba(255, 255, 255, 0.11);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-bg-hover: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --glass-border-light: rgba(255, 255, 255, 0.18);
+            
+            /* Text Colors */
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c0;
+            --text-tertiary: #7a7a90;
+            
+            /* Shadows & Glows */
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-acrylic: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            --glow-gold: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Fluent Design Acrylic Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 15% 20%, rgba(59, 130, 246, 0.11) 0%, transparent 40%),
+                radial-gradient(ellipse at 85% 80%, rgba(96, 165, 250, 0.08) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Acrylic Noise Texture */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.035;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            mix-blend-mode: overlay;
+        }
+
+        .dashboard-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            background: var(--bg-primary);
+        }
+
+        /* Acrylic Sidebar */
+        .sidebar {
+            width: 280px;
+            padding: 24px 16px;
+            background: rgba(18, 18, 26, 0.75);
+            backdrop-filter: blur(40px) saturate(180%) brightness(1.02);
+            -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.02);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            position: relative;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.15), rgba(59, 130, 246, 0.2), rgba(255, 255, 255, 0.15), transparent);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            text-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .logo i {
+            font-size: 28px;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-item i {
+            width: 20px;
+            font-size: 18px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+        }
+
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.12);
+            color: #ffffff;
+        }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.18);
+            color: var(--gold);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Acrylic Header */
+        .header {
+            padding: 24px 32px;
+            background: rgba(18, 18, 26, 0.72);
+            backdrop-filter: blur(40px) saturate(180%) brightness(1.03);
+            -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), rgba(59, 130, 246, 0.25), rgba(255, 255, 255, 0.12), transparent);
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+        }
+
+        .header-left p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 32px;
+            background: var(--bg-primary);
+        }
+
+        /* Search & Filters Bar */
+        .controls-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: rgba(26, 26, 38, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filter-btn {
+            padding: 14px 24px;
+            background: rgba(40, 40, 55, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Acrylic Employee Table Card */
+        .table-card {
+            background: rgba(26, 26, 38, 0.65);
+            backdrop-filter: blur(30px) saturate(150%) brightness(1.03);
+            -webkit-backdrop-filter: blur(30px) saturate(150%) brightness(1.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: var(--shadow-acrylic);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .table-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .employee-count {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .employee-count span {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 16px 24px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #0a0a0f;
+        }
+
+        .employee-name {
+            font-weight: 500;
+        }
+
+        .employee-id {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .risk-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .risk-medium {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 8px;
+            color: var(--gold);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--gold);
+        }
+
+        /* Loading State */
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 24px 10px;
+            }
+            .logo span, .nav-item span {
+                display: none;
+            }
+            .table-card {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>AttritionAI</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="/" class="nav-item">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/employees" class="nav-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Employees</span>
+                </a>
+                <a href="/analysis" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Attrition Analysis</span>
+                </a>
+                <a href="/predictions" class="nav-item">
+                    <i class="fas fa-brain"></i>
+                    <span>Predictions</span>
+                </a>
+                <a href="/reports" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="/settings" class="nav-item" style="margin-top: auto;">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1>Employee Directory</h1>
+                    <p>Manage and monitor employee attrition risk</p>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Controls Bar -->
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search employees by name, department, or role..." id="searchInput">
+                    </div>
+                    <button class="filter-btn">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                    <button class="filter-btn">
+                        <i class="fas fa-sort"></i>
+                        Sort by Risk
+                    </button>
+                </div>
+
+                <!-- Employee Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3 class="table-title">All Employees</h3>
+                        <div class="employee-count">Total: <span id="totalCount">--</span> employees</div>
+                    </div>
+                    
+                    <div id="tableContent">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Fetch employee data from API
+        async function loadEmployees() {
+            try {
+                const response = await fetch('/api/dashboard-data');
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                renderTable(data);
+            } catch (error) {
+                showError('Failed to load employee data');
+                console.error(error);
+            }
+        }
+
+        function renderTable(data) {
+            const employees = data.risk_analysis || [];
+            document.getElementById('totalCount').textContent = employees.length;
+
+            if (employees.length === 0) {
+                document.getElementById('tableContent').innerHTML = `
+                    <div style="padding: 60px; text-align: center; color: var(--text-secondary);">
+                        <i class="fas fa-users" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p>No employee data available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Department</th>
+                            <th>Job Role</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            employees.forEach((emp, index) => {
+                const initials = `E${index + 1}`;
+                const riskClass = emp.risk_level === 'High' ? 'risk-high' : 
+                                  emp.risk_level === 'Medium' ? 'risk-medium' : 'risk-low';
+                
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <div class="employee-info">
+                                <div class="employee-avatar">${initials}</div>
+                                <div>
+                                    <div class="employee-name">Employee ${index + 1}</div>
+                                    <div class="employee-id">ID: EMP-${String(index + 1).padStart(4, '0')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${emp.Department || 'N/A'}</td>
+                        <td>${emp.JobRole || 'N/A'}</td>
+                        <td>${(emp.risk_score * 100).toFixed(1)}%</td>
+                        <td><span class="risk-badge ${riskClass}">${emp.risk_level}</span></td>
+                        <td><button class="action-btn" onclick="viewDetails(${index})">View Details</button></td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            
+            // Add pagination
+            tableHTML += `
+                <div class="pagination">
+                    <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            `;
+
+            document.getElementById('tableContent').innerHTML = tableHTML;
+        }
+
+        function showError(message) {
+            document.getElementById('tableContent').innerHTML = `
+                <div style="padding: 60px; text-align: center; color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function viewDetails(index) {
+            alert('Employee details view - Feature coming soon!');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadEmployees);
+    </script>
+</body>
+</html>

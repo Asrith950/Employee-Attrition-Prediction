@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Launch dashboard",
+			"type": "shell",
+			"command": ".\\dashboard\\launch_premium_dashboard.bat",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

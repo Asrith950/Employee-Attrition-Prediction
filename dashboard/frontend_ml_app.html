@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attrition Prediction - Frontend ML System</title>
+    
+    <!-- SheetJS Library for Excel parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0b1120;
+            --bg-secondary: #0f1b3d;
+            --surface: rgba(15, 23, 42, 0.6);
+            --surface-strong: rgba(15, 23, 42, 0.75);
+            --neon-blue: #38bdf8;
+            --neon-cyan: #22d3ee;
+            /* Fluent Design Acrylic Effects */
+            --acrylic-bg: rgba(15, 23, 42, 0.55);
+            --acrylic-bg-strong: rgba(15, 23, 42, 0.70);
+            --acrylic-bg-hover: rgba(15, 23, 42, 0.80);
+            --acrylic-tint: rgba(56, 189, 248, 0.04);
+            --glass-bg: rgba(15, 23, 42, 0.55);
+            --glass-border: rgba(56, 189, 248, 0.25);
+            --text-primary: #ffffff;
+            --text-secondary: #a0b0c8;
+            --danger: #ff6b6b;
+            --warning: #60a5fa;
+            --shadow-blue: 0 20px 50px rgba(3, 7, 18, 0.6);
+            --shadow-acrylic: 0 8px 32px rgba(3, 7, 18, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            --glow-blue: 0 0 24px rgba(56, 189, 248, 0.35);
+        }
+
+        body {
+            font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Fluent Design Acrylic Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 55%),
+                radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.14) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Acrylic Noise Texture Overlay - Fluent Design */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.035;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            mix-blend-mode: overlay;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar with Acrylic Material */
+        .sidebar {
+            width: 280px;
+            padding: 28px 18px;
+            background: linear-gradient(180deg, rgba(10, 18, 42, 0.92), rgba(8, 12, 30, 0.92));
+            backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+            -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(56, 189, 248, 0.18);
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--neon-blue);
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-radius: 999px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(56, 189, 248, 0.16);
+            color: #ffffff;
+            box-shadow: 0 0 18px rgba(56, 189, 248, 0.4);
+        }
+
+        .nav-item.active {
+            border: 1px solid rgba(56, 189, 248, 0.45);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Header with Acrylic Material */
+        .header {
+            padding: 26px 32px;
+            background: rgba(11, 17, 32, 0.65);
+            backdrop-filter: blur(30px) saturate(150%) brightness(1.05);
+            -webkit-backdrop-filter: blur(30px) saturate(150%) brightness(1.05);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Acrylic Light Diffusion for Header */
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.25), transparent);
+        }
+
+        .header-left p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #a5f3fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: #041221;
+            box-shadow: 0 10px 22px rgba(14, 165, 233, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 14px 30px rgba(56, 189, 248, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-primary);
+            border: 1px solid rgba(56, 189, 248, 0.22);
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 0 18px rgba(56, 189, 248, 0.2);
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* Glass Effect */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            box-shadow: var(--shadow-blue);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .glass::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1px solid rgba(56, 189, 248, 0.12);
+            pointer-events: none;
+        }
+
+        .glass:hover {
+            box-shadow: var(--shadow-blue), var(--glow-blue);
+            transform: translateY(-2px);
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            padding: 26px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(17, 24, 48, 0.7), rgba(12, 18, 36, 0.45));
+            transition: all 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 18px 45px rgba(3, 7, 18, 0.5), var(--glow-blue);
+        }
+
+        .kpi-icon {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(56, 189, 248, 0.16);
+            color: var(--neon-blue);
+            box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.35);
+        }
+
+        .kpi-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .kpi-value.highlight {
+            background: linear-gradient(135deg, #ffffff, var(--neon-blue));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Upload Area */
+        .upload-section {
+            text-align: center;
+            padding: 60px 40px;
+            margin: 40px auto;
+            max-width: 600px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--neon-blue);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--neon-blue);
+            background: rgba(56, 189, 248, 0.14);
+        }
+
+        .upload-icon {
+            font-size: 64px;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .data-table th {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--neon-blue);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .data-table tr:hover {
+            background: var(--glass-bg);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-high {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .badge-medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .badge-low {
+            background: rgba(56, 189, 248, 0.18);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 320px;
+            margin: 20px 0;
+        }
+
+        .chart-container canvas {
+            border-radius: 16px;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 10px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-section select option {
+            color: #000000;
+            background: #ffffff;
+        }
+
+        .filter-section input:focus,
+        .filter-section select:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--neon-blue);
+        }
+
+        .alert-error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: var(--danger);
+        }
+
+        .alert-info {
+            background: rgba(41, 182, 246, 0.1);
+            border: 1px solid rgba(41, 182, 246, 0.3);
+            color: #29b6f6;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .metric-box {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Settings */
+        .setting-item {
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--glass-bg);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--neon-blue);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--glass-bg);
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: #ffffff;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--neon-blue);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data i,
+        .no-data svg {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1100px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .nav-menu {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions .btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i data-lucide="brain"></i>
+                <span>AttritionML</span>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-item active" data-page="dashboard">
+                    <i data-lucide="home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-page="employees">
+                    <i data-lucide="users"></i>
+                    <span>Employees</span>
+                </div>
+                <div class="nav-item" data-page="analysis">
+                    <i data-lucide="line-chart"></i>
+                    <span>Analysis</span>
+                </div>
+                <div class="nav-item" data-page="predictions">
+                    <i data-lucide="bot"></i>
+                    <span>AI Predictions</span>
+                </div>
+                <div class="nav-item" data-page="reports">
+                    <i data-lucide="file-text"></i>
+                    <span>Reports</span>
+                </div>
+                <div class="nav-item" data-page="settings">
+                    <i data-lucide="settings"></i>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p>
+                        Frontend-only ML-powered analytics
+                    </p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="dataLoader.downloadTemplate()">
+                        <i data-lucide="download"></i> Download Template
+                    </button>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <i data-lucide="upload"></i> Upload Dataset
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadSampleData()">
+                        <i data-lucide="database"></i> Load Sample
+                    </button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="alertBox" class="alert"></div>
+
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page active">
+                    <div id="noDataDashboard" class="no-data">
+                        <i data-lucide="database"></i>
+                        <h2>No Dataset Loaded</h2>
+                        <p>Upload an Excel file or load sample data to get started</p>
+                        <div style="margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="loadSampleData()">
+                                <i data-lucide="database"></i> Load Sample Dataset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="dashboardContent" style="display: none;">
+                        <div class="kpi-grid">
+                            <div class="kpi-card glass">
+                                <div class="kpi-icon"><i data-lucide="users"></i></div>
+                                <div class="kpi-label">Total Employees</div>
+                                <div class="kpi-value" id="totalEmployees">0</div>
+                            </div>
+                            <div class="kpi-card glass">
+                                <div class="kpi-icon"><i data-lucide="trending-down"></i></div>
+                                <div class="kpi-label">Attrition Rate</div>
+                                <div class="kpi-value highlight" id="attritionRate">0%</div>
+                            </div>
+                            <div class="kpi-card glass">
+                                <div class="kpi-icon"><i data-lucide="alert-triangle"></i></div>
+                                <div class="kpi-label">High Risk</div>
+                                <div class="kpi-value" style="color: var(--danger);" id="highRisk">0</div>
+                            </div>
+                            <div class="kpi-card glass">
+                                <div class="kpi-icon"><i data-lucide="gauge"></i></div>
+                                <div class="kpi-label">Average Risk Score</div>
+                                <div class="kpi-value" id="avgRiskScore">0</div>
+                            </div>
+                        </div>
+
+                        <div class="glass" style="padding: 24px;">
+                            <h2 style="margin-bottom: 20px;">Risk Distribution</h2>
+                            <div class="chart-container">
+                                <canvas id="riskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employees Page -->
+                <div id="employees" class="page">
+                    <div id="noDataEmployees" class="no-data">
+                        <i data-lucide="users"></i>
+                        <h2>No Employees Data</h2>
+                        <p>Please upload a dataset first</p>
+                    </div>
+
+                    <div id="employeesContent" style="display: none;">
+                        <div class="filter-section">
+                            <input type="text" id="searchEmployee" placeholder="Search by name, ID, or role...">
+                            <select id="filterDepartment">
+                                <option value="">All Departments</option>
+                            </select>
+                            <select id="filterRisk">
+                                <option value="">All Risk Levels</option>
+                                <option value="high">High Risk</option>
+                                <option value="medium">Medium Risk</option>
+                                <option value="low">Low Risk</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="applyFilters()">
+                                <i data-lucide="filter"></i> Apply
+                            </button>
+                        </div>
+
+                        <div class="glass" style="padding: 24px; overflow-x: auto;">
+                            <table class="data-table" id="employeeTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Role</th>
+                                        <th>Risk Score</th>
+                                        <th>Status</th>
+                                        <th>Predicted</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Page -->
+                <div id="analysis" class="page">
+                    <div id="noDataAnalysis" class="no-data">
+                        <i data-lucide="line-chart"></i>
+                        <h2>No Analysis Available</h2>
+                        <p>Please upload a dataset first</p>
+                    </div>
+
+                    <div id="analysisContent" style="display: none;">
+                        <div class="glass" style="padding: 24px; margin-bottom: 24px;">
+                            <h2 style="margin-bottom: 20px;">Department-wise Attrition</h2>
+                            <div class="chart-container">
+                                <canvas id="departmentChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="glass" style="padding: 24px;">
+                            <h2 style="margin-bottom: 20px;">Risk Factors Weight</h2>
+                            <div class="chart-container">
+                                <canvas id="factorsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Predictions Page -->
+                <div id="predictions" class="page">
+                    <div id="noDataPredictions" class="no-data">
+                        <i data-lucide="bot"></i>
+                        <h2>No Predictions Available</h2>
+                        <p>Please upload a dataset first</p>
+                    </div>
+
+                    <div id="predictionsContent" style="display: none;">
+                        <div class="glass" style="padding: 24px; margin-bottom: 24px;">
+                            <h2 style="margin-bottom: 20px;">Model Performance</h2>
+                            <div class="metrics-grid">
+                                <div class="metric-box glass">
+                                    <div class="metric-value" id="accuracy">0%</div>
+                                    <div class="metric-label">Accuracy</div>
+                                </div>
+                                <div class="metric-box glass">
+                                    <div class="metric-value" id="precision">0%</div>
+                                    <div class="metric-label">Precision</div>
+                                </div>
+                                <div class="metric-box glass">
+                                    <div class="metric-value" id="recall">0%</div>
+                                    <div class="metric-label">Recall</div>
+                                </div>
+                                <div class="metric-box glass">
+                                    <div class="metric-value" id="f1score">0%</div>
+                                    <div class="metric-label">F1 Score</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass" style="padding: 24px;">
+                            <h2 style="margin-bottom: 20px;">High Risk Employees</h2>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Employee</th>
+                                        <th>Department</th>
+                                        <th>Risk Score</th>
+                                        <th>Top Risk Factor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="highRiskTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reports" class="page">
+                    <div id="noDataReports" class="no-data">
+                        <i data-lucide="file-text"></i>
+                        <h2>No Reports Available</h2>
+                        <p>Please upload a dataset first</p>
+                    </div>
+
+                    <div id="reportsContent" style="display: none;">
+                        <div class="glass" style="padding: 32px;">
+                            <h2 style="margin-bottom: 24px;">Generate Reports</h2>
+                            
+                            <div style="display: grid; gap: 24px;">
+                                <div class="setting-item glass">
+                                    <h3 style="margin-bottom: 16px;">
+                                        <i data-lucide="file-spreadsheet"></i> Export as CSV
+                                    </h3>
+                                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                                        Download complete employee data with risk scores
+                                    </p>
+                                    <button class="btn btn-primary" onclick="exportCSV()">
+                                        <i data-lucide="download"></i> Download CSV
+                                    </button>
+                                </div>
+
+                                <div class="setting-item glass">
+                                    <h3 style="margin-bottom: 16px;">
+                                        <i data-lucide="file-text"></i> Summary Report
+                                    </h3>
+                                    <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                                        Generate PDF summary with key statistics
+                                    </p>
+                                    <button class="btn btn-primary" onclick="exportPDF()">
+                                        <i data-lucide="download"></i> Generate PDF
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="reportStats" style="margin-top: 32px; display: none;">
+                                <h3 style="margin-bottom: 16px;">Report Statistics</h3>
+                                <div id="reportStatsContent"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settings" class="page">
+                    <div class="glass" style="padding: 32px;">
+                        <h2 style="margin-bottom: 24px;">Settings</h2>
+
+                        <div class="setting-item glass">
+                            <label>
+                                Risk Threshold: <span id="thresholdValue">75</span>
+                            </label>
+                            <input type="range" id="riskThreshold" min="0" max="100" value="75" 
+                                   oninput="updateThreshold(this.value)">
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">
+                                Employees with risk score above this threshold are classified as "High Risk"
+                            </p>
+                        </div>
+
+                        <div class="setting-item glass">
+                            <label style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Auto-refresh Data</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="autoRefresh">
+                                    <span class="slider"></span>
+                                </label>
+                            </label>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">
+                                Automatically recalculate when parameters change
+                            </p>
+                        </div>
+
+                        <div class="setting-item glass">
+                            <label>Dataset Management</label>
+                            <button class="btn btn-secondary" onclick="resetDataset()" style="margin-top: 12px;">
+                                <i data-lucide="trash-2"></i> Clear Dataset
+                            </button>
+                            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">
+                                Remove all loaded data and reset the application
+                            </p>
+                        </div>
+
+                        <div class="setting-item glass">
+                            <label>Algorithm Information</label>
+                            <div style="padding: 16px; background: var(--glass-bg); border-radius: 8px; margin-top: 12px;">
+                                <pre style="color: var(--text-secondary); font-size: 12px; line-height: 1.8; white-space: pre-wrap;">
+RiskScore = 
+  0.25 × (1 - JobSatisfaction) +
+  0.20 × (OverTime == "Yes") +
+  0.15 × (1 - WorkLifeBalance) +
+  0.15 × (1 - MonthlyIncome) +
+  0.15 × (1 - YearsAtCompany) +
+  0.10 × (1 - Age)
+
+Normalized to 0-100 scale</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden file input - Shows all files for better UX -->
+                <input type="file" id="fileInput" onchange="handleFileUpload(event)">
+            </div>
+        </main>
+    </div>
+
+    <!-- Include ML Engine and Data Loader -->
+    <script src="ml_engine.js"></script>
+    <script src="data_loader.js"></script>
+
+    <script>
+        // Global variables
+        let charts = {};
+
+        function createChartGradient(ctx, rgb) {
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 320);
+            gradient.addColorStop(0, `rgba(${rgb}, 0.35)`);
+            gradient.addColorStop(1, `rgba(${rgb}, 0)`);
+            return gradient;
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.dataset.page;
+                navigateToPage(page);
+            });
+        });
+
+        function navigateToPage(pageName) {
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+
+            // Update pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageName).classList.add('active');
+
+            // Update title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'employees': 'Employees',
+                'analysis': 'Attrition Analysis',
+                'predictions': 'AI Predictions',
+                'reports': 'Reports',
+                'settings': 'Settings'
+            };
+            document.getElementById('pageTitle').textContent = titles[pageName];
+
+            // Refresh page content
+            if (mlEngine.processedData) {
+                switch(pageName) {
+                    case 'employees':
+                        loadEmployeesPage();
+                        break;
+                    case 'analysis':
+                        loadAnalysisPage();
+                        break;
+                    case 'predictions':
+                        loadPredictionsPage();
+                        break;
+                }
+            }
+        }
+
+        // File upload handler
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                showAlert(`Loading ${file.name}...`, 'info');
+                const result = await dataLoader.loadFile(file);
+                showAlert(`✓ ${result.fileType} file loaded successfully! ${result.rows} rows, ${result.columns} columns`, 'success');
+                event.target.value = ''; // Reset file input
+            } catch (error) {
+                showAlert(`✗ Error: ${error.message}`, 'error');
+                console.error('Upload error details:', error);
+                event.target.value = ''; // Reset file input
+            }
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            try {
+                const result = dataLoader.loadSampleDataset();
+                showAlert(`Sample dataset loaded! ${result.rows} employees`, 'success');
+            } catch (error) {
+                showAlert(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Alert system
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        // Subscribe to ML engine updates
+        mlEngine.subscribe((engine) => {
+            updateAllPages();
+        });
+
+        // Update all pages
+        function updateAllPages() {
+            const hasData = mlEngine.processedData !== null;
+
+            // Toggle no-data messages
+            const noDataSections = ['Dashboard', 'Employees', 'Analysis', 'Predictions', 'Reports'];
+            noDataSections.forEach(section => {
+                const noData = document.getElementById(`noData${section}`);
+                const content = document.getElementById(`${section.toLowerCase()}Content`);
+                if (noData && content) {
+                    noData.style.display = hasData ? 'none' : 'block';
+                    content.style.display = hasData ? 'block' : 'none';
+                }
+            });
+
+            if (!hasData) return;
+
+            updateDashboard();
+            updateEmployeeFilters();
+        }
+
+        // Update dashboard
+        function updateDashboard() {
+            const stats = mlEngine.statistics;
+            if (!stats) return;
+
+            document.getElementById('totalEmployees').textContent = stats.totalEmployees;
+            document.getElementById('attritionRate').textContent = stats.attritionRate + '%';
+            document.getElementById('highRisk').textContent = stats.highRisk;
+            document.getElementById('avgRiskScore').textContent = stats.averageRiskScore;
+
+            // Update risk distribution chart
+            updateRiskChart();
+        }
+
+        // Update risk chart
+        function updateRiskChart() {
+            const ctx = document.getElementById('riskChart');
+            if (!ctx) return;
+
+            if (charts.risk) {
+                charts.risk.destroy();
+            }
+
+            const dist = mlEngine.statistics.riskDistribution;
+
+            const blueGradient = createChartGradient(ctx, '56, 189, 248');
+
+            charts.risk = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dist.map(d => d.range),
+                    datasets: [{
+                        label: 'Number of Employees',
+                        data: dist.map(d => d.count),
+                        fill: true,
+                        tension: 0.4,
+                        backgroundColor: blueGradient,
+                        borderColor: 'rgba(56, 189, 248, 1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: 'rgba(56, 189, 248, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.12)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.08)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update employee filters
+        function updateEmployeeFilters() {
+            const deptSelect = document.getElementById('filterDepartment');
+            if (!deptSelect) return;
+
+            const departments = [...new Set(mlEngine.processedData.map(e => e.Department))];
+            deptSelect.innerHTML = '<option value="">All Departments</option>' +
+                departments.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
+
+        // Load employees page
+        function loadEmployeesPage() {
+            applyFilters();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const search = document.getElementById('searchEmployee').value;
+            const department = document.getElementById('filterDepartment').value;
+            const riskLevel = document.getElementById('filterRisk').value;
+
+            const employees = mlEngine.getEmployees({
+                search,
+                department,
+                riskLevel,
+                sortBy: 'RiskScore',
+                sortOrder: 'desc'
+            });
+
+            const tbody = document.getElementById('employeeTableBody');
+            tbody.innerHTML = employees.map(emp => `
+                <tr>
+                    <td>${emp.EmployeeID || 'N/A'}</td>
+                    <td>${emp.Name || 'N/A'}</td>
+                    <td>${emp.Department}</td>
+                    <td>${emp.JobRole}</td>
+                    <td>${emp.RiskScore}</td>
+                    <td><span class="badge badge-${emp.RiskLevel}">${emp.RiskStatus}</span></td>
+                    <td>${emp.PredictedAttrition}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Load analysis page
+        function loadAnalysisPage() {
+            updateDepartmentChart();
+            updateFactorsChart();
+        }
+
+        // Update department chart
+        function updateDepartmentChart() {
+            const ctx = document.getElementById('departmentChart');
+            if (!ctx) return;
+
+            if (charts.department) {
+                charts.department.destroy();
+            }
+
+            const deptStats = mlEngine.statistics.byDepartment;
+            const departments = Object.keys(deptStats);
+
+            const blueGradient = createChartGradient(ctx, '56, 189, 248');
+            const cyanGradient = createChartGradient(ctx, '34, 211, 238');
+
+            charts.department = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: departments,
+                    datasets: [{
+                        label: 'Attrition Rate (%)',
+                        data: departments.map(d => parseFloat(deptStats[d].attritionRate)),
+                        fill: true,
+                        tension: 0.4,
+                        backgroundColor: blueGradient,
+                        borderColor: 'rgba(56, 189, 248, 1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }, {
+                        label: 'Avg Risk Score',
+                        data: departments.map(d => parseFloat(deptStats[d].avgRiskScore)),
+                        fill: true,
+                        tension: 0.4,
+                        backgroundColor: cyanGradient,
+                        borderColor: 'rgba(34, 211, 238, 1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.12)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.08)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update risk factors chart
+        function updateFactorsChart() {
+            const ctx = document.getElementById('factorsChart');
+            if (!ctx) return;
+
+            if (charts.factors) {
+                charts.factors.destroy();
+            }
+
+            const factors = ['Job Satisfaction', 'OverTime', 'Work-Life Balance', 'Income', 'Tenure', 'Age'];
+            const weights = [25, 20, 15, 15, 15, 10];
+
+            const blueGradient = createChartGradient(ctx, '56, 189, 248');
+
+            charts.factors = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: factors,
+                    datasets: [{
+                        label: 'Risk Factor Weight',
+                        data: weights,
+                        fill: true,
+                        tension: 0.45,
+                        backgroundColor: blueGradient,
+                        borderColor: 'rgba(56, 189, 248, 1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: 'rgba(56, 189, 248, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.12)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.08)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load predictions page
+        function loadPredictionsPage() {
+            const metrics = mlEngine.statistics.metrics;
+            if (!metrics) return;
+
+            document.getElementById('accuracy').textContent = metrics.accuracy + '%';
+            document.getElementById('precision').textContent = metrics.precision + '%';
+            document.getElementById('recall').textContent = metrics.recall + '%';
+            document.getElementById('f1score').textContent = metrics.f1Score + '%';
+
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+            // Load high risk employees
+            const highRisk = mlEngine.getHighRiskEmployees(10);
+            const tbody = document.getElementById('highRiskTableBody');
+            tbody.innerHTML = highRisk.map((emp, idx) => {
+                const factors = emp.RiskFactors;
+                const topFactor = Object.entries(factors).reduce((a, b) => a[1] > b[1] ? a : b);
+                
+                return `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${emp.Name || emp.EmployeeID}</td>
+                        <td>${emp.Department}</td>
+                        <td><span class="badge badge-high">${emp.RiskScore}</span></td>
+                        <td>${topFactor[0]}: ${topFactor[1]}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Export CSV
+        function exportCSV() {
+            const csv = mlEngine.exportCSV();
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attrition_analysis.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showAlert('CSV exported successfully!', 'success');
+        }
+
+        // Export PDF
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const stats = mlEngine.statistics;
+            
+            doc.setFontSize(20);
+            doc.text('Employee Attrition Report', 20, 20);
+            
+            doc.setFontSize(12);
+            doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 30);
+            
+            doc.setFontSize(14);
+            doc.text('Key Statistics', 20, 45);
+            
+            doc.setFontSize(11);
+            doc.text(`Total Employees: ${stats.totalEmployees}`, 30, 55);
+            doc.text(`Attrition Rate: ${stats.attritionRate}%`, 30, 62);
+            doc.text(`High Risk: ${stats.highRisk}`, 30, 69);
+            doc.text(`Medium Risk: ${stats.mediumRisk}`, 30, 76);
+            doc.text(`Low Risk: ${stats.lowRisk}`, 30, 83);
+            doc.text(`Average Risk Score: ${stats.averageRiskScore}`, 30, 90);
+            
+            doc.setFontSize(14);
+            doc.text('Model Performance', 20, 105);
+            
+            doc.setFontSize(11);
+            const metrics = stats.metrics;
+            doc.text(`Accuracy: ${metrics.accuracy}%`, 30, 115);
+            doc.text(`Precision: ${metrics.precision}%`, 30, 122);
+            doc.text(`Recall: ${metrics.recall}%`, 30, 129);
+            doc.text(`F1 Score: ${metrics.f1Score}%`, 30, 136);
+            
+            doc.save('attrition_report.pdf');
+            showAlert('PDF generated successfully!', 'success');
+        }
+
+        // Settings
+        function updateThreshold(value) {
+            document.getElementById('thresholdValue').textContent = value;
+            mlEngine.setRiskThreshold(parseInt(value));
+            showAlert(`Risk threshold updated to ${value}`, 'success');
+        }
+
+        function resetDataset() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                mlEngine.reset();
+                showAlert('Dataset cleared', 'success');
+            }
+        }
+
+        // Initialize
+        console.log('✓ Frontend ML System Ready');
+        console.log('✓ No backend required - all processing happens in your browser');
+    </script>
+</body>
+</html>
